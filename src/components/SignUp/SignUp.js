@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { Link } from "react-router-dom";
 import "./SignUp.css";
 
 const SignUp = () => {
@@ -44,14 +45,14 @@ const SignUp = () => {
   return (
     <div className="signUpBody">
       <form onSubmit={submitHandler} className="form">
-      <h1>SignUp</h1>
+        <h4>SignUp</h4>
         <div>
           <input
             type="email"
             placeholder="Email"
             required
             ref={inputEmailRef}
-            autoComplete='on'
+            autoComplete="on"
           />
         </div>
         <div>
@@ -60,7 +61,7 @@ const SignUp = () => {
             placeholder="Password"
             required
             ref={inputPasswordRef}
-            autoComplete='on'
+            autoComplete="on"
           />
         </div>
         <div>
@@ -69,11 +70,16 @@ const SignUp = () => {
             placeholder="Confirm Password"
             required
             ref={inputConfirmPasswordRef}
-            autoComplete='on'
+            autoComplete="on"
           />
         </div>
         <div>
           <button className="signUpBtn">SignUp</button>
+        </div>
+        <div className="P">
+          <p>
+            Already Registered? <Link to="/login">Login</Link>
+          </p>
         </div>
       </form>
     </div>
