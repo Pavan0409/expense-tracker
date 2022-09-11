@@ -34,11 +34,15 @@ const SignUp = () => {
       if (res.ok) {
         alert("Successfully Registered");
         console.log("Succcessfully Registered");
+        return res.json();
       } else {
         return res.json().then((data) => {
-          alert("datta.error.message");
+          alert(data.error.message);
         });
       }
+    }).then((data) =>{
+      localStorage.setItem("idToken", data.idToken);
+      console.log(data);
     });
   };
 
