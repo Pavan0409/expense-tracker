@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import "./Profile.css";
 
-const Profile = () => {
+const Profile = (props) => {
   const fullNameRef = useRef();
   const profileUrlRef = useRef();
 
@@ -23,6 +23,7 @@ const Profile = () => {
           displayName: enteredFullName,
           photoUrl: eneteredProfileUrl,
           returnSecureToken: true,
+          
         }),
         headers: {
           "Content-Type": "application/json",
@@ -45,13 +46,14 @@ const Profile = () => {
       <form className="form" onSubmit={profileUpdateHandler}>
         <h2>Contact Details</h2>
         <div>
-          <label>FullName</label>
-          <input type="text" id="fullname" required ref={fullNameRef} />
+          <label htmlFor='fullName'>FullName</label>
+          <input type="text" id="fullname" required ref={fullNameRef} placeholder={props.inputName}/>
         </div>
         <div>
-          <label>Profile Photo URL</label>
-          <input type="text" id="profileURL" required ref={profileUrlRef} />
+          <label htmlFor="profileURL">Profile Photo URL</label>
+          <input type="text" id="profileURL" required ref={profileUrlRef} placeholder={props.inputURL} />
         </div>
+        <></>
         <div>
           <button type="submit" className="btn">
             Update
