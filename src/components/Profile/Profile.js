@@ -32,6 +32,7 @@ const Profile = (props) => {
     ).then((res) => {
       if (res.ok) {
         alert("Profile Updated");
+        console.log(res,'//////////////')
         return res.json();
       } else {
         return res.json((data) => {
@@ -39,7 +40,9 @@ const Profile = (props) => {
           alert(data.error.message);
         });
       }
-    });
+    }).then(data=>{
+      console.log(data);
+    })
   };
   return (
     <div className="profile">
