@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 
-const Login = () => {
+const Login = (props) => {
   const loginEmailRef = useRef();
   const loginPasswordRef = useRef();
   const navigate = useNavigate();
@@ -32,19 +32,19 @@ const Login = () => {
         } else {
           return res.json().then((data) => {
             alert(data.error.message);
-            throw new Error(data.error.message)
+            throw new Error(data.error.message);
           });
         }
       })
       .then((data) => {
-        console.log(data);
+        localStorage.setItem("idToken", data.idToken);
+        props.setLogin(true);
         navigate("/welcome");
-        // localStorage.setItem("TokenID Expense", data.idToken);
-        console.log("data", data);
-      }).catch((error) =>{
-        alert("Something went wrong")
-        console.log("Something went wrong");
       })
+      .catch((error) => {
+        alert("Something went wrong");
+        console.log("Something went wrong");
+      });
   };
   return (
     <div className="loginBody">
