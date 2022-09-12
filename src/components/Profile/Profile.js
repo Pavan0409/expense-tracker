@@ -23,38 +23,51 @@ const Profile = (props) => {
           displayName: enteredFullName,
           photoUrl: eneteredProfileUrl,
           returnSecureToken: true,
-          
         }),
         headers: {
           "Content-Type": "application/json",
         },
       }
-    ).then((res) => {
-      if (res.ok) {
-        alert("Profile Updated");
-        console.log(res,'//////////////')
-        return res.json();
-      } else {
-        return res.json((data) => {
-          console.log(data, "----error-data");
-          alert(data.error.message);
-        });
-      }
-    }).then(data=>{
-      console.log(data);
-    })
+    )
+      .then((res) => {
+        if (res.ok) {
+          alert("Profile Updated");
+          console.log(res, "//////////////");
+          return res.json();
+        } else {
+          return res.json((data) => {
+            console.log(data, "----error-data");
+            alert(data.error.message);
+          });
+        }
+      })
+      .then((data) => {
+        console.log(data);
+      });
   };
   return (
     <div className="profile">
       <form className="form" onSubmit={profileUpdateHandler}>
         <h2>Contact Details</h2>
         <div>
-          <label htmlFor='fullName'>FullName</label>
-          <input type="text" id="fullname" required ref={fullNameRef} placeholder={props.inputName}/>
+          <label htmlFor="fullName">FullName</label>
+          <input
+            type="text"
+            id="fullname"
+            required
+            ref={fullNameRef}
+            placeholder={props.inputName}
+          />
         </div>
         <div>
           <label htmlFor="profileURL">Profile Photo URL</label>
-          <input type="text" id="profileURL" required ref={profileUrlRef} placeholder={props.inputURL} />
+          <input
+            type="text"
+            id="profileURL"
+            required
+            ref={profileUrlRef}
+            placeholder={props.inputURL}
+          />
         </div>
         <></>
         <div>

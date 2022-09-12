@@ -72,13 +72,16 @@ const Login = (props) => {
         </div>
         <div>
           <button type="submit" className="loginBtn">
-            Submit
+            Login
           </button>
         </div>
         <div className="P">
           <p>
             Create account Here! <Link to="/">SignUp</Link>
           </p>
+        </div>
+        <div>
+        <Link to="/resetpasscode">ForgotPassword</Link>
         </div>
       </form>
     </div>
