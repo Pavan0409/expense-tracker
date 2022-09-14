@@ -1,30 +1,32 @@
-import React, { useRef, useState } from "react";
-import ExpenseList from "./ExpenseList";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import classes from './Expenses.module.css';
 
 const Expenses = () => {
-  const dummyExpense = [
-    {
-      id: "a1",
-      money: "100",
-      description: "For health and school",
-      category: "others",
-    },
-  ];
   const [refresh, setRefresh] = useState(false);
-  const [expense, setExpense] = useState(dummyExpense);
+  const [expense, setExpense] = useState([]);
+  const [category, setCategory] = useState("");
+  const [money, setMoney] = useState("");
+  const [description, setDescription] = useState("");
+  const [editId, setEditId] = useState("");
+  const [editForm, setEditForm] = useState(false);
 
-  const inputExpenseMoneyRef = useRef();
-  const inputExpenseDescriptionRef = useRef();
-  const inputExpenseCategoryRef = useRef();
+  const moneyHandler = (event) => {
+    setMoney(event.target.value);
+  };
+
+  const descriptionHandler = (event) => {
+    setDescription(event.target.value);
+  };
+  const categoryHandler = (event) => {
+    setCategory(event.target.value);
+  };
 
   //////Get request
   useEffect(() => {
     fetch(
-      "https://expense-tracker-7f0ee-default-rtdb.firebaseio.com/Expenses.json",
+      "https://expense-tracker-f3426-default-rtdb.asia-southeast1.firebasedatabase.app/Expenses.json",
       {
         method: "GET",
-        // body: JSON.stringify(expenseDate),
         headers: {
           "Content-Type": "application/json",
         },
@@ -52,7 +54,6 @@ const Expenses = () => {
             category: data[key].category,
           };
           storeData.unshift(d);
-
           console.log(d);
         }
         setExpense([...storeData]);
@@ -63,31 +64,75 @@ const Expenses = () => {
   const expenseSubmitHandler = (event) => {
     event.preventDefault();
 
-    const enteredExpenseMoney = inputExpenseMoneyRef.current.value;
-    const enteredExpenseDescription = inputExpenseDescriptionRef.current.value;
-    const enteredExpenseCategory = inputExpenseCategoryRef.current.value;
-
-    const newExpense = {
-      id: Math.random().toString(),
-      money: enteredExpenseMoney,
-      description: enteredExpenseDescription,
-      category: enteredExpenseCategory,
+    const expenseData = {
+      money,
+      description,
+      category,
     };
 
-    ////Post request
+    if (editId) {
+      fetch(
+        `https://expense-tracker-f3426-default-rtdb.asia-southeast1.firebasedatabase.app/Expenses/${editId}.json`,
+        {
+          method: "PUT",
+          body: JSON.stringify(expenseData),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      ).then((res) => {
+        if (res.ok) {
+          setRefresh(true);
+        }
+      });
+    } else {
+      //Post Data
+      fetch(
+        "https://expense-tracker-f3426-default-rtdb.asia-southeast1.firebasedatabase.app/Expenses.json",
+        {
+          method: "POST",
+          body: JSON.stringify(expenseData),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+        .then((res) => {
+          if (res.ok) {
+            alert("data sent to the backend");
+            setRefresh(true);
+            return res.json();
+          } else {
+            return res.json((data) => {
+              throw new Error(data.error.message);
+            });
+          }
+        })
+
+        .catch((err) => {
+          alert(err.message);
+        });
+    }
+  };
+  ///Delete
+  const deleteListHandler = (id) => {
+    const deleted = expense.filter((item) => {
+      return item.id !== id;
+    });
+    setExpense(deleted);
+    console.log(deleted);
+
     fetch(
-      "https://expense-tracker-7f0ee-default-rtdb.firebaseio.com/Expenses.json",
+      `https://expense-tracker-f3426-default-rtdb.asia-southeast1.firebasedatabase.app/Expenses/${id}.json`,
       {
-        method: "POST",
-        body: JSON.stringify(newExpense),
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
       }
     ).then((res) => {
       if (res.ok) {
-        alert("data sent to the backend");
-        console.log(res);
+        alert("Expense successfully deleted");
         return res.json();
       } else {
         return res.json((data) => {
@@ -95,27 +140,49 @@ const Expenses = () => {
         });
       }
     });
-    inputExpenseMoneyRef.current.value = "";
-    inputExpenseDescriptionRef.current.value = "";
-    inputExpenseCategoryRef.current.value = "";
   };
+
+  ////Edit
+  const editHandler = (editId) => {
+    console.log(editId);
+    setEditId(editId);
+    setEditForm(true);
+    const editData = expense.filter((item) => {
+      return item.id === editId;
+    });
+    console.log(editData);
+    editData.map((item) => {
+      setMoney(item.money);
+      setCategory(item.category);
+      setDescription(item.description);
+      return;
+    });
+  };
+
   return (
     <div>
-      <h2>Enter Expenses</h2>
       <form onSubmit={expenseSubmitHandler}>
+        <h2>Add Expenses</h2>
         <label htmlFor="expenseMoney">Money</label>
-        <input id="expenseMoney" type="text" ref={inputExpenseMoneyRef} />
+        <input
+          id="expenseMoney"
+          type="number"
+          value={money}
+          onChange={(event) => moneyHandler(event)}
+        />
         <label htmlFor="expenseDescription">Description</label>
         <input
           id="expenseDescription"
           type="text"
-          ref={inputExpenseDescriptionRef}
+          value={description}
+          onChange={(event) => descriptionHandler(event)}
         />
         <label htmlFor="expenseCategory">Category</label>
         <select
           name="Category"
           id="expenseCategory"
-          ref={inputExpenseCategoryRef}
+          value={category}
+          onChange={(event) => categoryHandler(event)}
         >
           <option value="food">Food</option>
           <option value="travel">Travel</option>
@@ -124,7 +191,19 @@ const Expenses = () => {
         </select>
         <button type="submit">Submit</button>
       </form>
-      <ExpenseList items={expense} />
+      {expense.map((item) => {
+        return (
+          <ul key={item.id} className={classes.ul}>
+            <li>Money: {item.money}</li>
+            <li>Description: {item.description}</li>
+            <li>Category: {item.category}</li>
+            <div className={classes.btnn}>
+              <button onClick={() => editHandler(item.id)}>Edit</button>
+              <button onClick={() => deleteListHandler(item.id)}>Delete</button>
+            </div>
+          </ul>
+        );
+      })}
     </div>
   );
 };

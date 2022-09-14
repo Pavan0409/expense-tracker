@@ -1,0 +1,28 @@
+.main {
+  /* background-color:antiquewhite; */
+  padding: 5px;
+}
+
+.ul {
+  display: flex;
+  background-color: rgb(4, 138, 147);
+  border-radius: 5px;
+  width: 75%;
+  height: 2rem;
+}
+
+.ul li {
+  display: flex;
+  font-size: 15px;
+  padding: 5px;
+  flex-direction: column;
+  padding: 10px 40px;
+  height: 2rem;
+}
+
+
+.btnn {
+  margin-left: 50px;
+  height: 2rem;
+  color: darkorange;
+}
