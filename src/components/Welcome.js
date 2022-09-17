@@ -1,15 +1,19 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Expenses from "./Expenses/Expenses";
+import { authActions } from "./store/authReducer"
 
 const Welcome = () => {
+  const islogin = useSelector((state) => state.auth.isAuthenticated);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(authActions.login());
+  }, []);
+
   return (
     <>
-    <div>
-      <h2>Welcomme to Expense Tracker</h2>
-    </div>
-    <p>Your profile is Incomplete<Link to="/completeprofile">Complete Now</Link></p>
-    <Expenses />
+      <Expenses />
     </>
   );
 };

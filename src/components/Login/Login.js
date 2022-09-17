@@ -1,4 +1,6 @@
 import React, { useRef } from "react";
+import { useDispatch } from "react-redux";
+import { authActions } from "../store/authReducer";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 
@@ -6,6 +8,7 @@ const Login = (props) => {
   const loginEmailRef = useRef();
   const loginPasswordRef = useRef();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const loginSubmitHandler = (event) => {
     event.preventDefault();
@@ -38,7 +41,7 @@ const Login = (props) => {
       })
       .then((data) => {
         localStorage.setItem("idToken", data.idToken);
-        props.setLogin(true);
+        dispatch(authActions.login());
         navigate("/welcome");
       })
       .catch((error) => {

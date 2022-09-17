@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import classes from './Expenses.module.css';
+import { useDispatch, useSelector } from "react-redux";
+import { expenseActions } from "../store/expenseReducer";
 
 const Expenses = () => {
   const [refresh, setRefresh] = useState(false);
@@ -8,7 +10,11 @@ const Expenses = () => {
   const [money, setMoney] = useState("");
   const [description, setDescription] = useState("");
   const [editId, setEditId] = useState("");
-  const [editForm, setEditForm] = useState(false);
+  const [data, setData] = useState([]);
+  const [premium, setPremium] = useState(false);
+  const storedExpense =useSelector((state)=> state.expense.expense);
+  const TotalExpense = useSelector((state)=> state.expense.totalexpense);
+  const dispatch = useDispatch();
 
   const moneyHandler = (event) => {
     setMoney(event.target.value);
@@ -44,7 +50,8 @@ const Expenses = () => {
       .then((data) => {
         console.log(data);
 
-        const storeData = [];
+        if(data !== null){
+          const storeData = [];
         for (let key in data) {
           console.log(key);
           let d = {
@@ -55,21 +62,24 @@ const Expenses = () => {
           };
           storeData.unshift(d);
           console.log(d);
+          dispatch(expenseActions.totalexpense(data[key].money));
         }
+        dispatch(expenseActions.expense(storeData));
         setExpense([...storeData]);
         console.log(storeData);
+        }
       });
   }, [refresh]);
 
+  const expenseData = {
+    money,
+    description,
+    category,
+  };
+
   const expenseSubmitHandler = (event) => {
     event.preventDefault();
-
-    const expenseData = {
-      money,
-      description,
-      category,
-    };
-
+    ///For Editing
     if (editId) {
       fetch(
         `https://expense-tracker-f3426-default-rtdb.asia-southeast1.firebasedatabase.app/Expenses/${editId}.json`,
@@ -83,6 +93,7 @@ const Expenses = () => {
       ).then((res) => {
         if (res.ok) {
           setRefresh(true);
+          setData(res.data);
         }
       });
     } else {
@@ -108,12 +119,21 @@ const Expenses = () => {
             });
           }
         })
-
         .catch((err) => {
           alert(err.message);
         });
     }
   };
+
+  useEffect(() => {
+    if(TotalExpense >= 10000){
+      setPremium(true);
+    }else{
+      setPremium(false);
+    }
+  },[TotalExpense]);
+
+
   ///Delete
   const deleteListHandler = (id) => {
     const deleted = expense.filter((item) => {
@@ -146,21 +166,60 @@ const Expenses = () => {
   const editHandler = (editId) => {
     console.log(editId);
     setEditId(editId);
-    setEditForm(true);
-    const editData = expense.filter((item) => {
+    
+    const editData = storedExpense.filter((item) => {
       return item.id === editId;
     });
-    console.log(editData);
     editData.map((item) => {
       setMoney(item.money);
       setCategory(item.category);
       setDescription(item.description);
-      return;
+      // return;
     });
+    if(editId){
+      fetch(`https://expense-tracker-f3426-default-rtdb.asia-southeast1.firebasedatabase.app/Expenses/${editId}.json`,{
+        method: "PUT",
+        body:JSON.stringify(expenseData),
+        headers:{
+          "Content-Type": "application/json",
+        },
+      }).then((res)=> {
+        if(res.ok){
+          setRefresh(true);
+        }
+      });
+    }else{
+      //Post Data
+      fetch(
+        "https://expense-tracker-f3426-default-rtdb.asia-southeast1.firebasedatabase.app/Expenses.json",
+        {
+          method: "POST",
+          body:JSON.stringify(expenseData),
+          headers:{
+            "Content-Type": "application/json",
+          },
+        }
+      ).then((res)=>{
+        if(res.ok){
+          alert("data sent to the backend");
+            dispatch(expenseActions.expense(expenseData));
+            setRefresh(true);
+            return res.json();
+        }else{
+          return res.json((data) =>{
+            throw new Error(data.error.message);
+          });
+        }
+      }).catch((err) => {
+        alert(err.message);
+      })
+    }
   };
 
   return (
     <div>
+    <h3>Total Expense: ₹{TotalExpense}</h3>
+    {premium && <button>Activate Premium</button>}
       <form onSubmit={expenseSubmitHandler}>
         <h2>Add Expenses</h2>
         <label htmlFor="expenseMoney">Money</label>
@@ -187,11 +246,11 @@ const Expenses = () => {
           <option value="food">Food</option>
           <option value="travel">Travel</option>
           <option value="home decor">Home Decor</option>
-          <option value="others">Others</option>
+          <option value="Others">Others</option>
         </select>
         <button type="submit">Submit</button>
       </form>
-      {expense.map((item) => {
+      {storedExpense.map((item) => {
         return (
           <ul key={item.id} className={classes.ul}>
             <li>Money: {item.money}</li>
